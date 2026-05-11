@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LogIn, Lock, User, Sparkles } from 'lucide-react';
 import { cn } from '../lib/utils';
+import YourLogo from '../assets/logo.png'; // Pastikan path filenya benar
 
 interface LoginProps {
   onLogin: () => void;
@@ -45,8 +46,12 @@ export default function Login({ onLogin }: LoginProps) {
       >
         <div className="glass rounded-[2rem] p-8 md:p-12 shadow-2xl">
           <div className="flex flex-col items-center mb-8">
-            <div className="w-16 h-16 rounded-2xl gradient-mint flex items-center justify-center shadow-lg mb-4">
-              <Sparkles className="text-white w-8 h-8" />
+            <div className="w-20 h-20 mb-4"> {/* Anda bisa atur ukuran w dan h di sini */}
+              <img 
+                src={YourLogo} 
+                alt="Logo TM Generator" 
+                className="w-full h-full object-contain" 
+              />
             </div>
             <h1 className="text-3xl font-bold text-mint-900">TM GENERATOR</h1>
             <p className="text-mint-700 font-medium">AI Modul Ajar Generator</p>

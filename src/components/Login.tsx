@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LogIn, Lock, User, Sparkles } from 'lucide-react';
 import { cn } from '../lib/utils';
-import YourLogo from '../public/logo.png'; // Pastikan path filenya benar
+import YourLogo from 'public/logo.png'; // Pastikan path filenya benar
 
 interface LoginProps {
   onLogin: () => void;

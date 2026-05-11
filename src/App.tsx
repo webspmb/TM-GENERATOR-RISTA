@@ -48,8 +48,12 @@ export default function App() {
       {/* Navigation Rail / Header */}
       <nav className="no-print glass-dark sticky top-0 z-50 px-6 py-4 mb-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl gradient-mint flex items-center justify-center shadow-lg">
-            <Sparkles className="text-white w-5 h-5" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center">
+            <img 
+              src="/logo.png" 
+              alt="Logo" 
+              className="w-full h-full object-contain" 
+            />
           </div>
           <div>
             <h1 className="text-lg font-bold text-white leading-tight">SD NEGERI KAJULANGKO</h1>

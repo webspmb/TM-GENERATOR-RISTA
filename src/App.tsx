@@ -50,7 +50,7 @@ export default function App() {
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center">
             <img 
-              src="/logo.png" 
+              src="/SDN_KAJULANGKO-removebg-preview.png" 
               alt="Logo" 
               className="w-full h-full object-contain" 
             />

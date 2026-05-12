@@ -50,14 +50,14 @@ export default function App() {
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center">
             <img 
-              src="/SDN_KAJULANGKO-removebg-preview.png" 
+              src="/logo.png" 
               alt="Logo" 
               className="w-full h-full object-contain" 
             />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-white leading-tight">SD NEGERI KAJULANGKO</h1>
-            <p className="text-[10px] text-mint-200 uppercase tracking-widest font-bold">TM Generator PRO Edition</p>
+            <h1 className="text-lg font-bold text-white leading-tight">TM GENERATOR</h1>
+            <p className="text-[10px] text-mint-200 uppercase tracking-widest font-bold">PRO Edition</p>
           </div>
         </div>
 

@@ -6,9 +6,9 @@ import { cn } from '../lib/utils';
 
 // Daftar sekolah yang diperbolehkan
 const ALLOWED_SCHOOLS = [
-  "SD NEGERI KAJULANGKO",
+  "SD NEGERI 1 AMPANA KOTA",
   "SMP TM GENERATOR APP",
-  "SMA UNGGULAN"
+  "SD Negeri 1 Ampana Kota"
 ];
 
 interface GeneratorFormProps {

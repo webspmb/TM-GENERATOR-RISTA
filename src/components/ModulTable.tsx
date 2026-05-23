@@ -152,7 +152,7 @@ export default function ModulTable({ data, formInput, onBack }: ModulTableProps)
                 </tr>
                 <tr>
                   <td className="font-semibold">Kelas/Semester</td>
-                  <td>{data.identitas.classSemester}</td>
+                  <td>{data.identitas.classSemester?.replace(/Kelas\s*/i, '').trim()}</td>
                 </tr>
                 <tr>
                   <td className="font-semibold">Jumlah Pertemuan</td>

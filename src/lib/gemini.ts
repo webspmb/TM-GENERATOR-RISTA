@@ -6,13 +6,12 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 export async function generateModulAjar(data: ModulFormData): Promise<GeneratedModul> {
   const prompt = `
     Bertindaklah sebagai Ahli Kurikulum Merdeka dan Senior Instructional Designer.
-    Bantu saya menghasilkan "Rencana Pelaksanaan Pembelajaran Mendalam (RPPM)" yang kreatif dan sesuai standar.
+    Bantu saya menghasilkan "Rencana Pelaksanaan Pembelajaran Mendalam (RPPM)" yang kreatif, terstruktur, dan sesuai standar.
     
     DATA INPUT:
     - Satuan Pendidikan: ${data.schoolName}
     - Mapel: ${data.subject}
     - Jenjang/Kelas/Semester: ${data.level} / ${data.grade} / ${data.semester}
-    - Materi: ${data.material}
     - CP: ${data.cp}
     - TP: ${data.tp}
     - Jumlah Pertemuan: ${data.meetings}
@@ -22,13 +21,15 @@ export async function generateModulAjar(data: ModulFormData): Promise<GeneratedM
 
     TUGAS & ATURAN FORMAT:
     1. Identitas: classSemester harus berformat "Kelas ${data.grade} / ${data.semester}" (HANYA berisi informasi kelas dan semester dari input, tanpa embel-embel jenjang).
-    2. Identifikasi Murid: Deskripsi profil murid yang relevan. Gunakan istilah "murid" untuk menyapa atau merujuk ke subjek didik (JANGAN gunakan "siswa" atau "peserta didik").
-    3. Adaptasi Lokal: Berikan contoh kasus atau hubungkan materi dengan budaya/lingkungan nyata di Indonesia yang relevan.
+    2. Materi Pelajaran & Kesesuaian Jenjang (SANGAT PENTING): 
+       - Analisis "Tujuan Pembelajaran (TP)" yang diberikan, lalu tentukan dan simpulkan nama materi pokok yang tepat untuk diisi ke dalam properti "identifikasi.material".
+       - Anda WAJIB menyesuaikan kedalaman materi, kompleksitas bahasa, gaya belajar, serta pemilihan kegiatan berdasarkan Jenjang dan Kelas yang diinput (${data.level} / Kelas ${data.grade}). Pastikan tingkat kesulitan materi tidak terlalu tinggi/rendah untuk kelas tersebut.
+    3. Identifikasi Murid: Deskripsi profil murid yang relevan dengan karakteristik psikologi perkembangan usia murid di jenjang ${data.level} Kelas ${data.grade}. Gunakan istilah "murid" (JANGAN gunakan "siswa" atau "peserta didik").
     4. Pengalaman Belajar:
-       - Memahami (Kegiatan Awal): Wajib pilih salah satu prinsip (berkesadaran/bermakna/menggembirakan) dan sebutkan di awal. Selipkan satu ide "Ice Breaking" kreatif yang berhubungan dengan topik.
-       - Mengaplikasi (Kegiatan Inti): Wajib pilih salah satu prinsip (berkesadaran/bermakna/menggembirakan). Sesuaikan dengan sintaks ${data.pedagogy.join(", ")}.
+       - Memahami (Kegiatan Awal): Wajib pilih salah satu prinsip (berkesadaran/bermakna/menggembirakan) dan sebutkan di awal. Selipkan satu ide "Ice Breaking" kreatif yang ramah anak dan relevan dengan usia kelas tersebut.
+       - Mengaplikasi (Kegiatan Inti): Wajib pilih salah satu prinsip (berkesadaran/bermakna/menggembirakan). Sesuaikan langkahnya dengan sintaks ${data.pedagogy.join(", ")} serta sesuaikan dengan kapasitas kognitif murid kelas ${data.grade}.
        - Merefleksi (Kegiatan Penutup): Wajib pilih salah satu prinsip (berkesadaran/bermakna/menggembirakan).
-    5. Asesmen: Generate Asesmen Awal (diagnostik), Proses (formatif), dan Akhir (sumatif) yang sesuai dengan materi (JANGAN generate rubrik penilaian).
+    5. Asesmen: Generate Asesmen Awal, Proses (formatif), dan Akhir (sumatif) yang sesuai dengan instrumen penilaian tingkat perkembangan jenjang ${data.level} Kelas ${data.grade} (JANGAN gunakan kata 'diagnostik' dan JANGAN generate rubrik penilaian).
        
     OUTPUT HARUS DALAM BAHASA INDONESIA YANG BAIK DAN BENAR (Ejaan yang Disempurnakan).
     Seluruh output wajib menggunakan istilah "murid" dan tidak boleh menggunakan kata "siswa" atau "peserta didik".
@@ -66,17 +67,15 @@ export async function generateModulAjar(data: ModulFormData): Promise<GeneratedM
             },
             desain: {
               type: Type.OBJECT,
-              required: ["cp", "crossDisciplinary", "tp", "topic", "pedagogy", "partnership", "environment", "digitalUtilization", "adaptasiLokal"],
+              required: ["cp", "crossDisciplinary", "tp", "pedagogy", "partnership", "environment", "digitalUtilization"],
               properties: {
                 cp: { type: Type.STRING },
                 crossDisciplinary: { type: Type.STRING },
                 tp: { type: Type.STRING },
-                topic: { type: Type.STRING },
                 pedagogy: { type: Type.STRING },
                 partnership: { type: Type.STRING },
                 environment: { type: Type.STRING },
-                digitalUtilization: { type: Type.STRING },
-                adaptasiLokal: { type: Type.STRING }
+                digitalUtilization: { type: Type.STRING }
               }
             },
             pengalaman: {

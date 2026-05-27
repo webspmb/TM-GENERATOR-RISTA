@@ -30,11 +30,11 @@ export default function Login({ onLogin }: LoginProps) {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center p-4">
+    <div className="fixed inset-0 flex items-center justify-center p-4 bg-white">
       {/* Background Decor */}
       <div className="absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-mint-200/40 blur-[100px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-mint-400/30 blur-[100px]" />
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-blue-200/40 blur-[100px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-teal-400/30 blur-[100px]" />
       </div>
 
       <motion.div
@@ -52,36 +52,36 @@ export default function Login({ onLogin }: LoginProps) {
                 className="w-full h-full object-contain" 
               />
             </div>
-            <h1 className="text-3xl font-bold text-mint-900">TM GENERATOR</h1>
-            <p className="text-mint-700 font-medium">AI Modul Ajar Generator</p>
+            <h1 className="text-3xl font-bold text-blue-900">TM GENERATOR</h1>
+            <p className="text-teal-700 font-medium">Teaching Modul Generator</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-mint-800 ml-1">Username</label>
+              <label className="text-sm font-semibold text-blue-800 ml-1">Username</label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-mint-500" />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-teal-500" />
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Masukkan Username"
-                  className="w-full bg-white/50 border border-mint-200 rounded-2xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-mint-500 focus:border-transparent outline-none transition-all placeholder:text-mint-300"
+                  className="w-full bg-white/50 border border-blue-200 rounded-2xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-blue-300"
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-mint-800 ml-1">Password</label>
+              <label className="text-sm font-semibold text-blue-800 ml-1">Password</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-mint-500" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-teal-500" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Masukkan Password"
-                  className="w-full bg-white/50 border border-mint-200 rounded-2xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-mint-500 focus:border-transparent outline-none transition-all placeholder:text-mint-300"
+                  className="w-full bg-white/50 border border-blue-200 rounded-2xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-blue-300"
                   required
                 />
               </div>
@@ -104,7 +104,7 @@ export default function Login({ onLogin }: LoginProps) {
               type="submit"
               disabled={isSubmitting}
               className={cn(
-                "w-full gradient-mint text-white font-bold py-4 rounded-2xl shadow-lg shadow-mint-500/30 hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2",
+                "w-full bg-gradient-to-r from-blue-700 to-teal-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-500/30 hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2",
                 isSubmitting && "opacity-70 cursor-not-allowed"
               )}
             >
@@ -119,7 +119,7 @@ export default function Login({ onLogin }: LoginProps) {
             </button>
           </form>
 
-          <p className="mt-8 text-center text-xs text-mint-600 font-medium tracking-wide uppercase">
+          <p className="mt-8 text-center text-xs text-amber-600 font-medium tracking-wide uppercase">
             Profesional Edition
           </p>
         </div>

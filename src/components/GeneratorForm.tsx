@@ -1,21 +1,32 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { Send, Plus, Minus, School, User as UserIcon, Briefcase, GraduationCap, Calendar, Clock, BookOpen, Layers, Trash2, FileText } from 'lucide-react';
+import { Send, Plus, Minus, School, User as UserIcon, Briefcase, GraduationCap, Calendar, Clock, BookOpen, Layers, Trash2, FileText, RefreshCw } from 'lucide-react';
 import { ModulFormData } from '../types';
 import { cn } from '../lib/utils';
+import { getCPList } from '../data/cp_data';
+import { syncGoogleSheetsCP } from '../lib/sheets';
 
 // Daftar sekolah yang diperbolehkan
 const ALLOWED_SCHOOLS = [
   "SD Negeri 1 Ampana Kota",
   "SD NEGERI 1 AMPANA KOTA",
-  "SDN 1 AMPANA KOTA"
+  "SDN 1 AMPANA KOTA",
+  "SMP Negeri 1 Merdeka",
+  "SMP NEGERI 1 MERDEKA",
+  "SMPN 1 MERDEKA",
+  "SMA Negeri 1 Merdeka",
+  "SMA NEGERI 1 MERDEKA",
+  "SMAN 1 MERDEKA",
+  "SMK Negeri 1 Merdeka",
+  "SMK NEGERI 1 MERDEKA",
+  "SMKN 1 MERDEKA"
 ];
 
 // Daftar nama guru yang diperbolehkan
 const ALLOWED_TEACHERS = [
   "Rista Kasaraeng, S.Pd",
   "RISTA KASARAENG, S.Pd",
-  "Fidhal" 
+  "FIDHAL, S.Pd" 
 ];
 
 interface GeneratorFormProps {
@@ -34,6 +45,110 @@ const PEDAGOGY_OPTIONS = [
   'Inkuiri-Discovery', 'PjBL', 'Problem Solving', 'Game Based Learning', 'Station Learning'
 ];
 
+const GRADES_BY_LEVEL: Record<'SD' | 'SMP' | 'SMA' | 'SMK', string[]> = {
+  SD: ['1', '2', '3', '4', '5', '6'],
+  SMP: ['7', '8', '9'],
+  SMA: ['10', '11', '12'],
+  SMK: ['10', '11', '12']
+};
+
+const SUBJECTS_BY_LEVEL: Record<'SD' | 'SMP' | 'SMA' | 'SMK', string[]> = {
+  SD: [
+    "Bahasa Indonesia",
+    "Matematika",
+    "Ilmu Pengetahuan Alam dan Sosial (IPAS)",
+    "Pendidikan Pancasila",
+    "Pendidikan Agama Islam",
+    "Pendidikan Agama Kristen",
+    "Pendidikan Agama Katolik",
+    "Pendidikan Agama Hindu",
+    "Pendidikan Agama Buddha",
+    "Pendidikan Agama Khonghucu",
+    "Seni Rupa",
+    "Seni Musik",
+    "Seni Tari",
+    "Seni Teater",
+    "Pendidikan Jasmani, Olahraga, dan Kesehatan (PJOK)",
+    "Bahasa Inggris",
+    "Muatan Lokal"
+  ],
+  SMP: [
+    "Pendidikan Pancasila",
+    "Bahasa Indonesia",
+    "Matematika",
+    "Ilmu Pengetahuan Alam (IPA)",
+    "Ilmu Pengetahuan Sosial (IPS)",
+    "Bahasa Inggris",
+    "Pendidikan Agama Islam",
+    "Pendidikan Agama Kristen",
+    "Pendidikan Agama Katolik",
+    "Pendidikan Agama Hindu",
+    "Pendidikan Agama Buddha",
+    "Pendidikan Agama Khonghucu",
+    "Pendidikan Jasmani, Olahraga, dan Kesehatan (PJOK)",
+    "Informatika",
+    "Seni Rupa",
+    "Seni Musik",
+    "Seni Tari",
+    "Seni Teater",
+    "Prakarya Kerajinan",
+    "Prakarya Rekayasa",
+    "Prakarya Pengolahan",
+    "Prakarya Budidaya",
+    "Muatan Lokal"
+  ],
+  SMA: [
+    "Pendidikan Pancasila",
+    "Bahasa Indonesia",
+    "Matematika",
+    "Bahasa Inggris",
+    "Pendidikan Agama Islam",
+    "Pendidikan Agama Kristen",
+    "Pendidikan Agama Katolik",
+    "Pendidikan Agama Hindu",
+    "Pendidikan Agama Buddha",
+    "Pendidikan Agama Khonghucu",
+    "Pendidikan Jasmani, Olahraga, dan Kesehatan (PJOK)",
+    "Sejarah",
+    "Seni Rupa",
+    "Seni Musik",
+    "Seni Tari",
+    "Seni Teater",
+    "Fisika",
+    "Kimia",
+    "Biologi",
+    "Sosiologi",
+    "Ekonomi",
+    "Geografi",
+    "Antropologi",
+    "Informatika"
+  ],
+  SMK: [
+    "Pendidikan Pancasila",
+    "Bahasa Indonesia",
+    "Matematika",
+    "Bahasa Inggris",
+    "Pendidikan Agama Islam",
+    "Pendidikan Agama Kristen",
+    "Pendidikan Agama Katolik",
+    "Pendidikan Agama Hindu",
+    "Pendidikan Agama Buddha",
+    "Pendidikan Agama Khonghucu",
+    "Pendidikan Jasmani, Olahraga, dan Kesehatan (PJOK)",
+    "Sejarah",
+    "Informatika",
+    "Projek Ilmu Pengetahuan Alam dan Sosial (IPAS)",
+    "Seni Rupa",
+    "Seni Musik",
+    "Seni Tari",
+    "Seni Teater",
+    "Dasar-Dasar Program Keahlian",
+    "Konsentrasi Keahlian",
+    "Projek Kreatif dan Kewirausahaan (PKK)",
+    "Praktik Kerja Lapangan (PKL)"
+  ]
+};
+
 export default function GeneratorForm({ onSubmit, isLoading, savedData, onViewPrevious }: GeneratorFormProps) {
   const [formData, setFormData] = useState<ModulFormData>(() => {
     try {
@@ -45,6 +160,7 @@ export default function GeneratorForm({ onSubmit, isLoading, savedData, onViewPr
       console.error("Gagal memuat data dari localStorage", e);
     }
 
+    const initialLevel = savedData?.level || 'SD';
     return {
       schoolName: savedData?.schoolName || '',
       teacherName: savedData?.teacherName || '',
@@ -52,12 +168,14 @@ export default function GeneratorForm({ onSubmit, isLoading, savedData, onViewPr
       position: savedData?.position || 'Guru Kelas',
       principalName: savedData?.principalName || '',
       principalNip: savedData?.principalNip || '',
-      level: savedData?.level || 'SD',
-      grade: savedData?.grade || '',
+      signaturePlace: savedData?.signaturePlace || '',
+      level: initialLevel,
+      grade: savedData?.grade || GRADES_BY_LEVEL[initialLevel][0],
       semester: savedData?.semester || 'I / Ganjil',
-      subject: savedData?.subject || '',
+      subject: savedData?.subject || SUBJECTS_BY_LEVEL[initialLevel][0],
       cp: savedData?.cp || '',
       tp: savedData?.tp || '',
+      material: savedData?.material || '',
       meetings: savedData?.meetings || 1,
       duration: savedData?.duration || '',
       pedagogy: savedData?.pedagogy || [],
@@ -65,19 +183,89 @@ export default function GeneratorForm({ onSubmit, isLoading, savedData, onViewPr
     };
   });
 
+  const [isCustomSubject, setIsCustomSubject] = useState(() => {
+    const levelVal = formData.level || 'SD';
+    const currentSubjects = SUBJECTS_BY_LEVEL[levelVal] || [];
+    return formData.subject ? !currentSubjects.includes(formData.subject) : false;
+  });
+
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle');
+  const [syncErrorMessage, setSyncErrorMessage] = useState<string>("");
+  const [syncTrigger, setSyncTrigger] = useState<number>(0);
+  const [lastSyncedTime, setLastSyncedTime] = useState<string>(() => {
+    return localStorage.getItem('cp_sheet_last_synced') || "";
+  });
+
+  useEffect(() => {
+    const performSyncOnMount = async () => {
+      setSyncStatus('syncing');
+      const res = await syncGoogleSheetsCP();
+      if (res.success) {
+        setSyncStatus('success');
+        setLastSyncedTime(localStorage.getItem('cp_sheet_last_synced') || "");
+      } else {
+        setSyncStatus('error');
+        setSyncErrorMessage(res.error || "");
+      }
+    };
+    
+    performSyncOnMount();
+
+    const handleSyncedEvent = () => {
+      setSyncTrigger(prev => prev + 1);
+      setLastSyncedTime(localStorage.getItem('cp_sheet_last_synced') || "");
+    };
+
+    window.addEventListener('cp_database_synced', handleSyncedEvent);
+    return () => window.removeEventListener('cp_database_synced', handleSyncedEvent);
+  }, []);
+
   useEffect(() => {
     localStorage.setItem('tm_generator_form_data', JSON.stringify(formData));
   }, [formData]);
+
+  useEffect(() => {
+    const levelVal = formData.level || 'SD';
+    const currentSubjects = SUBJECTS_BY_LEVEL[levelVal] || [];
+    if (formData.subject && !currentSubjects.includes(formData.subject)) {
+      setIsCustomSubject(true);
+    } else if (formData.subject === "") {
+      // Keep custom subject input active while user types
+    } else {
+      setIsCustomSubject(false);
+    }
+  }, [formData.level, formData.subject]);
+
+  const prevParamsRef = useRef<string>("");
+
+  useEffect(() => {
+    const currentParams = `${formData.level}-${formData.grade}-${formData.subject}-${syncTrigger}`;
+    const isFirstRender = prevParamsRef.current === "" || !prevParamsRef.current.includes(`${formData.level}-${formData.grade}-${formData.subject}`);
+    
+    if (prevParamsRef.current !== currentParams) {
+      prevParamsRef.current = currentParams;
+      
+      const levelVal = formData.level as 'SD' | 'SMP' | 'SMA' | 'SMK';
+      const cpOptions = getCPList(levelVal, formData.grade, formData.subject);
+      
+      if (cpOptions.length > 0) {
+        if (!isFirstRender || !formData.cp) {
+          setFormData(prev => ({ ...prev, cp: cpOptions[0] }));
+        }
+      }
+    }
+  }, [formData.level, formData.grade, formData.subject, syncTrigger]);
 
   const handleClearForm = () => {
     if (confirm("Apakah Anda yakin ingin membersihkan semua draf data yang telah diisi?")) {
       localStorage.removeItem('tm_generator_form_data');
       setFormData({
         schoolName: '', teacherName: '', teacherNip: '', position: 'Guru Kelas',
-        principalName: '', principalNip: '', level: 'SD', grade: '',
-        semester: 'I / Ganjil', subject: '', cp: '', tp: '',
+        principalName: '', principalNip: '', signaturePlace: '', level: 'SD', grade: '1',
+        semester: 'I / Ganjil', subject: 'Bahasa Indonesia', cp: '', tp: '', material: '',
         meetings: 1, duration: '', pedagogy: [], dimensi: []
       });
+      setIsCustomSubject(false);
     }
   };
 
@@ -104,7 +292,29 @@ export default function GeneratorForm({ onSubmit, isLoading, savedData, onViewPr
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'level') {
+      const selectedLevel = value as 'SD' | 'SMP' | 'SMA' | 'SMK';
+      setFormData(prev => ({
+        ...prev,
+        level: selectedLevel,
+        grade: GRADES_BY_LEVEL[selectedLevel][0],
+        subject: SUBJECTS_BY_LEVEL[selectedLevel][0]
+      }));
+      setIsCustomSubject(false);
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handleSubjectSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    if (val === "__custom__") {
+      setIsCustomSubject(true);
+      setFormData(prev => ({ ...prev, subject: "" }));
+    } else {
+      setIsCustomSubject(false);
+      setFormData(prev => ({ ...prev, subject: val }));
+    }
   };
 
   const handleDimensiToggle = (item: string) => {
@@ -141,6 +351,12 @@ export default function GeneratorForm({ onSubmit, isLoading, savedData, onViewPr
     }
     onSubmit(formData);
   };
+
+  const cpOptions = getCPList(
+    formData.level as 'SD' | 'SMP' | 'SMA' | 'SMK',
+    formData.grade,
+    formData.subject
+  );
 
   const sectionClass = "glass p-6 md:p-8 rounded-[1.5rem] space-y-6";
   const labelClass = "text-sm font-bold text-blue-800 flex items-center gap-2";
@@ -207,6 +423,10 @@ export default function GeneratorForm({ onSubmit, isLoading, savedData, onViewPr
             <label className={labelClass}>NIP Kepala Sekolah</label>
             <input name="principalNip" value={formData.principalNip} onChange={handleChange} required className={inputClass} />
           </div>
+          <div className="space-y-2">
+            <label className={labelClass}><Briefcase className="w-4 h-4"/> Tempat Penandatanganan</label>
+            <input name="signaturePlace" value={formData.signaturePlace} onChange={handleChange} required className={inputClass} placeholder="Contoh: Merdeka, Jakarta, Barru, dll" />
+          </div>
         </div>
       </div>
 
@@ -225,11 +445,16 @@ export default function GeneratorForm({ onSubmit, isLoading, savedData, onViewPr
               <option value="SD">SD</option>
               <option value="SMP">SMP</option>
               <option value="SMA">SMA</option>
+              <option value="SMK">SMK</option>
             </select>
           </div>
           <div className="space-y-2">
             <label className={labelClass}>Kelas</label>
-            <input name="grade" value={formData.grade} onChange={handleChange} className={inputClass} placeholder="Contoh: 1, 7, 10" required />
+            <select name="grade" value={formData.grade} onChange={handleChange} className={inputClass} required>
+              {(GRADES_BY_LEVEL[formData.level as 'SD' | 'SMP' | 'SMA' | 'SMK'] || []).map((classVal) => (
+                <option key={classVal} value={classVal}>Kelas {classVal}</option>
+              ))}
+            </select>
           </div>
           <div className="space-y-2">
             <label className={labelClass}><Calendar className="w-4 h-4"/> Semester</label>
@@ -240,19 +465,145 @@ export default function GeneratorForm({ onSubmit, isLoading, savedData, onViewPr
           </div>
         </div>
         
-        <div className="space-y-2">
+        <div className="space-y-3">
           <label className={labelClass}><BookOpen className="w-4 h-4"/> Mata Pelajaran (Mapel)</label>
-          <input name="subject" value={formData.subject} onChange={handleChange} className={inputClass} required />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <select 
+              value={isCustomSubject ? "__custom__" : (formData.subject || "")} 
+              onChange={handleSubjectSelectChange} 
+              className={inputClass}
+            >
+              <option value="">-- Pilih Mata Pelajaran --</option>
+              {(SUBJECTS_BY_LEVEL[formData.level as 'SD' | 'SMP' | 'SMA' | 'SMK'] || []).map((sub) => (
+                <option key={sub} value={sub}>{sub}</option>
+              ))}
+              <option value="__custom__">✍️ Kustom / Tulis Sendiri...</option>
+            </select>
+
+            {isCustomSubject && (
+              <input 
+                type="text"
+                name="subject" 
+                value={formData.subject} 
+                onChange={handleChange} 
+                className={inputClass} 
+                placeholder="Masukkan Nama Mata Pelajaran Kustom"
+                required 
+              />
+            )}
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <label className={labelClass}><Layers className="w-4 h-4"/> Capaian Pembelajaran (CP)</label>
-          <textarea name="cp" value={formData.cp} onChange={handleChange} className={cn(inputClass, "h-24 resize-none")} required />
+        <div className="space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+            <label className={labelClass}>
+              <Layers className="w-4 h-4"/> Capaian Pembelajaran (CP) - Keputusan Kepala BSKAP No. 046/H/KR/2025
+            </label>
+            <span className="text-xs text-teal-800 font-bold bg-teal-50 border border-teal-200 px-2.5 py-1 rounded-lg">
+              Fase {formData.level === 'SD' ? (['1','2'].includes(formData.grade) ? 'A' : (['3','4'].includes(formData.grade) ? 'B' : 'C')) : (formData.level === 'SMP' ? 'D' : (formData.grade === '10' ? 'E' : 'F'))}
+            </span>
+          </div>
+
+          {/* Indikator Sinkronisasi Google Sheets */}
+          <div className="p-3 bg-blue-50/60 border border-blue-100 rounded-xl flex items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2 text-blue-950">
+              {syncStatus === 'syncing' ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 text-blue-600 animate-spin" />
+                  <span className="font-medium">Sinkronisasi CP dari spreadsheet Cloud...</span>
+                </>
+              ) : syncStatus === 'success' ? (
+                <>
+                  <span className="text-emerald-500 font-bold">●</span>
+                  <span>
+                    <strong className="text-emerald-950">CP cloud sinkron otomatis</strong>{" "}
+                    {lastSyncedTime && (
+                      <span className="text-slate-500 font-mono text-[10px]">
+                        (Selesai: {new Date(lastSyncedTime).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })})
+                      </span>
+                    )}
+                  </span>
+                </>
+              ) : syncStatus === 'error' ? (
+                <>
+                  <span className="text-amber-500 font-bold">●</span>
+                  <span className="text-slate-600">
+                    Gagal sinkron ({syncErrorMessage || "Koneksi terputus"}). Menggunakan data cadangan lokal.
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="text-slate-400 font-bold">●</span>
+                  <span>Tekan tombol sinkron untuk memuat dari Spreadsheet.</span>
+                </>
+              )}
+            </div>
+            
+            <button
+              type="button"
+              onClick={async () => {
+                setSyncStatus('syncing');
+                const res = await syncGoogleSheetsCP();
+                if (res.success) {
+                  setSyncStatus('success');
+                } else {
+                  setSyncStatus('error');
+                  setSyncErrorMessage(res.error || "");
+                }
+              }}
+              disabled={syncStatus === 'syncing'}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white hover:bg-slate-50 text-blue-800 border border-blue-200 transition-all font-semibold select-none disabled:opacity-50 text-xs shadow-sm cursor-pointer"
+              title="Sinkronkan data terupdate dari Google Spreadsheet"
+            >
+              <RefreshCw className={cn("w-3 h-3 text-blue-600", syncStatus === 'syncing' && "animate-spin")} />
+              <span>Sinkron</span>
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            <select
+              value={cpOptions.includes(formData.cp) ? formData.cp : "__custom__"}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val !== "__custom__") {
+                  setFormData(prev => ({ ...prev, cp: val }));
+                }
+              }}
+              className={inputClass}
+            >
+              {cpOptions.map((cpOpt, oIdx) => (
+                <option key={oIdx} value={cpOpt}>
+                  Pilihan {oIdx + 1}: {cpOpt.substring(0, 80)}...
+                </option>
+              ))}
+              <option value="__custom__">✍️ Kustom / Edit atau Tulis Sendiri...</option>
+            </select>
+
+            <textarea
+              name="cp"
+              value={formData.cp}
+              onChange={handleChange}
+              className={cn(inputClass, "h-32 resize-none text-justify leading-relaxed")}
+              placeholder="Pilih opsi di atas atau tulis Capaian Pembelajaran secara manual di sini..."
+              required
+            />
+          </div>
         </div>
 
         <div className="space-y-2">
           <label className={labelClass}>Tujuan Pembelajaran (TP)</label>
-          <textarea name="tp" value={formData.tp} onChange={handleChange} className={cn(inputClass, "h-24 resize-none")} required />
+          <textarea 
+            name="tp" 
+            value={formData.tp} 
+            onChange={handleChange} 
+            className={cn(inputClass, "h-28 resize-none text-justify leading-relaxed")} 
+            placeholder="Ketik Tujuan Pembelajaran spesifik di sini..."
+            required 
+          />
+          <p className="text-xs text-blue-800 font-bold mt-1 bg-blue-50/60 p-2.5 rounded-xl border border-blue-100 flex items-start gap-2">
+            <span>💡</span>
+            <span>Materi pokok / materi pelajaran akan dianalisis secara mendalam dan murni bersumber dari Tujuan Pembelajaran (TP) ini. Enjin AI tidak akan mengubah rumusan asli TP yang Anda ketik demi menjaga orisinalitas administrasi pembelajaran Anda.</span>
+          </p>
         </div>
       </div>
 

@@ -22,15 +22,53 @@ export default function ModulTable({ data, formInput, onBack }: ModulTableProps)
       <head><meta charset='utf-8'><title>RPPM</title>
       <style>
         @page { size: A4; margin: 2cm; mso-footer: f1; }
-        body { font-family: 'Times New Roman', serif; }
-        table { border-collapse: collapse; width: 100%; border: 1px solid black; }
-        td, th { border: 0.5pt solid black; padding: 8px; font-size: 11pt; vertical-align: top; }
+        body { font-family: 'Times New Roman', serif; line-height: 1.5; color: #1e293b; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 1.5rem; }
+        td, th { border: 0.5pt solid #cbd5e1; padding: 10px; font-size: 11pt; vertical-align: top; text-align: left; }
+        
+        /* Table widths & specific styles */
+        .spreadsheet-table { width: 100%; border-collapse: collapse; margin-top: 4px; page-break-inside: avoid; }
+        .spreadsheet-table td { border: 1px solid #cbd5e1; padding: 10px; word-wrap: break-word; }
+        .w-1/3 { width: 33.333% !important; }
+        .w-1/2 { width: 50% !important; }
+        .w-full { width: 100% !important; }
+        
+        /* Typography */
+        h1 { font-size: 16pt; font-weight: bold; text-align: center; text-transform: uppercase; margin-bottom: 2px; color: #000000; }
+        h2 { font-size: 11pt; font-weight: bold; background-color: #f0f7ff; color: #1e3a8a; padding: 8px; border: 1px solid #cbd5e1; margin-top: 20px; margin-bottom: 8px; text-transform: uppercase; }
+        p { margin: 0 0 8px 0; font-size: 11pt; }
         .text-justify { text-align: justify; text-justify: inter-word; }
         .text-center { text-align: center; }
+        .text-left { text-align: left; }
+        .font-semibold { font-weight: bold; }
         .font-bold { font-weight: bold; }
         .uppercase { text-transform: uppercase; }
+        .underline { text-decoration: underline; }
+        .text-sm { font-size: 10pt; }
+        .text-lg { font-size: 13pt; font-weight: bold; }
+        .text-xl { font-size: 15pt; font-weight: bold; }
+        .leading-relaxed { line-height: 1.6; }
+        
+        /* Coloring & background */
         .bg-blue-50 { background-color: #eff6ff !important; }
-        .bg-slate-100 { background-color: #f1f5f9 !important; }
+        .text-blue-900 { color: #1e3a8a !important; }
+        
+        /* Margins & paddings */
+        .mb-0 { margin-bottom: 0px !important; }
+        .mb-1 { margin-bottom: 4px !important; }
+        .mb-10 { margin-bottom: 40px !important; }
+        .mt-0 { margin-top: 0px !important; }
+        .mt-1 { margin-top: 4px !important; }
+        .mt-16 { margin-top: 64px !important; }
+        .mt-20 { margin-top: 80px !important; }
+        .p-0 { padding: 0px !important; }
+        .p-2 { padding: 8px !important; }
+        
+        /* Layout */
+        .border-none { border: none !important; }
+        .border-none td { border: none !important; }
+        .align-top { vertical-align: top !important; }
+        
         div.Section1 { page: Section1; }
         p.MsoFooter { margin: 0in; font-size: 9pt; }
       </style></head>
@@ -86,19 +124,20 @@ export default function ModulTable({ data, formInput, onBack }: ModulTableProps)
           .no-print { display: none !important; }
           @page { margin: 1.5cm; size: portrait; }
           body { background: white !important; -webkit-print-color-adjust: exact; }
-          .bg-white { 
+          .document-sheet { 
             width: 100% !important; 
             box-shadow: none !important; 
             padding: 0 !important;
             margin: 0 !important;
             border: none !important;
+            border-radius: 0 !important;
           }
         }
         .print-watermark { display: none; }
         .spreadsheet-table { width: 100%; border-collapse: collapse; margin-top: 4px; table-layout: fixed; }
         .spreadsheet-table td { border: 1px solid #cbd5e1; padding: 8px; word-wrap: break-word; }
         @media screen {
-          .bg-white {
+          .document-sheet {
             min-height: 29.7cm;
             width: 100%;
             max-width: 21cm;
@@ -135,7 +174,7 @@ export default function ModulTable({ data, formInput, onBack }: ModulTableProps)
       </div>
 
       <div className="w-full overflow-x-auto no-print-scrollbar">
-        <div ref={containerRef} className="bg-white p-6 md:p-12 shadow-sm border border-slate-200 text-slate-900 relative box-border">
+        <div ref={containerRef} className="document-sheet bg-white p-6 md:p-12 shadow-sm border border-slate-200 text-slate-900 relative box-border">
           <div className="print-watermark">
             {data.identitas.schoolName || formInput.schoolName || "DOKUMEN ASLI"}
           </div>
@@ -290,7 +329,9 @@ export default function ModulTable({ data, formInput, onBack }: ModulTableProps)
                     </div>
                   </td>
                   <td className="w-1/2 text-left align-top p-0 border-none">
-                    <p className="mb-1">................., ................... 20....</p>
+                    <p className="mb-1">
+                      {formInput.signaturePlace ? `${formInput.signaturePlace}` : '.................'}, ................... 20....
+                    </p>
                     <p className="mb-0">{formInput.position || 'Guru Kelas'}</p>
                     <div className="mt-20">
                       <p className="font-bold underline mb-0">{formInput.teacherName}</p>

@@ -55,13 +55,13 @@ export default function App() {
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center">
             <img 
-              src="/logoapp.png" 
+              src="/logo.png" 
               alt="Logo" 
               className="w-full h-full object-contain" 
             />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-white leading-tight">SD NEGERI 1 AMPANA KOTA</h1>
+            <h1 className="text-lg font-bold text-white leading-tight">SD NEGERI 1 MERDEKA</h1>
             <p className="text-[10px] text-amber-400 uppercase tracking-widest font-bold">TM Generator PRO Edition</p>
           </div>
         </div>
@@ -124,7 +124,7 @@ export default function App() {
           TM GENERATOR © {new Date().getFullYear()} • <span className="text-amber-600">Fidhal Touna AI</span>
         </p>
         <p className="text-xs text-blue-500 mt-1">
-          version : 2026.5.1
+          version : 2026.6.1
         </p>
       </footer>
     </div>

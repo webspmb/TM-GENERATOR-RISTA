@@ -5,9 +5,10 @@ export interface ModulFormData {
   position: string;
   principalName: string;
   principalNip: string;
-  level: 'SD' | 'SMP' | 'SMA';
+  signaturePlace: string;
+  level: 'SD' | 'SMP' | 'SMA' | 'SMK';
   grade: string;
-  semester: 'Ganjil' | 'Genap';
+  semester: string;
   subject: string;
   cp: string;
   tp: string;
